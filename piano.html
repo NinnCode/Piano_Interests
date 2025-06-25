@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Piano Performances | Nin Nichi</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --color-bg: #0f172a;
+      --color-panel: #1e293b;
+      --color-text: #cbd5e1;
+      --color-accent: #60a5fa;
+      --color-border: #334155;
+      --color-hover: #334155;
+      --font-title: 'Playfair Display', serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1.5rem 1rem;
+      text-align: center;
+      background-color: var(--color-panel);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-family: var(--font-title);
+      font-size: 2.25rem;
+      color: white;
+    }
+
+    .page-container {
+      flex-grow: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 320px;
+      background-color: var(--color-panel);
+      border-right: 1px solid var(--color-border);
+      transition: transform 0.3s ease-in-out;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header, .sidebar-footer {
+      padding: 1rem 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid var(--color-border);
+    }
+
+    .sidebar h2 {
+      font-size: 1.25rem;
+      color: var(--color-accent);
+    }
+
+    .song-list-scrollable {
+      list-style: none;
+      overflow-y: auto;
+      flex-grow: 1;
+      padding: 1rem 1.5rem;
+    }
+
+    .song-list-scrollable li {
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      padding: 0.75rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .song-list-scrollable li:hover {
+      background-color: var(--color-hover);
+    }
+
+    .song-list-scrollable li.active {
+      background-color: var(--color-hover);
+      color: var(--color-accent);
+      font-weight: 600;
+      border-left-color: var(--color-accent);
+    }
+
+    .back-btn {
+      display: block;
+      padding: 0.75rem;
+      background-color: var(--color-accent);
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      text-align: center;
+      transition: filter 0.2s;
+    }
+
+    .back-btn:hover {
+      filter: brightness(1.15);
+    }
+
+    .content {
+      flex: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-y: auto;
+    }
+
+    .video-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .video-author {
+      font-style: italic;
+      opacity: 0.75;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .iframe-wrapper {
+      width: 100%;
+      max-width: 500px; 
+   
+      aspect-ratio: 16 / 9; 
+      background-color: #000;
+      border-radius: 16px;
+      overflow: hidden; 
+      border: 2px solid rgba(96, 165, 250, 0.25);
+      box-shadow: 0 25px 60px rgba(96, 165, 250, 0.4);
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      object-fit: contain;
+      border-radius: 8px;
+      background: black;
+    }
+
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      background-color: var(--color-panel);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      z-index: 1001;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+      header h1 { font-size: 1.5rem; }
+      .menu-toggle { display: flex; align-items: center; justify-content: center; }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        transform: translateX(-100%);
+        z-index: 1000;
+        width: 280px;
+        max-width: 80%;
+        box-shadow: 2px 0 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .content { padding-top: 3rem; }
+      .video-title { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🎹 Piano Performances</h1>
+  </header>
+
+  <div class="page-container">
+    <button class="menu-toggle" onclick="toggleSidebar()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="sidebar open" id="sidebar">
+      <div class="sidebar-header">
+        <h2 style="text-align: center;">Song List</h2>
+      </div>
+      <ul id="songList" class="song-list-scrollable"></ul>
+      <div class="sidebar-footer">
+        <a class="back-btn" href="https://ninncode.github.io/ACADEMIC/">
+          <i class="fa-solid fa-arrow-left"></i> Back to Main Page
+        </a>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="video-title" id="videoTitle">Select a piece to watch</div>
+      <div class="video-author" id="videoAuthor"></div>
+      <div class="iframe-wrapper" id="videoContainer"></div>
+    </div>
+  </div>
+
+  <script>
+
+document.addEventListener('click', function (event) {
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle');
+
+
+    if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickToggle = toggleBtn.contains(event.target);
+
+        if (!isClickInsideSidebar && !isClickToggle) {
+            sidebar.classList.remove('open');
+        }
+    }
+});
+
+ document.addEventListener('DOMContentLoaded', () => {
+    // Danh sách bài hát đã được cập nhật với các FILE_ID bạn cung cấp
+    const songs = {
+        '1': { name: 'ドラえもんのうた', author: 'Lyrics by Takumi Kusube, Music by Shunsuke Kikuchi', fileId: '11SF3kFZzmCoc5CyRVVZLtDW820fJW1Dn' },
+        '2': { name: 'Có chàng trai viết lên cây', author: 'Written and performed by Phan Mạnh Quỳnh (2016 / featured in Dreamy Eyes, 2019)', fileId: '1EOmio2R6a0DMuKEnA71qJfzXQf05d7Ey' },
+        '3': { name: 'We Wish You a Merry Christmas', author: 'Traditional English Carol, Originated in the 16th century, West Country, England', fileId: '14MRVElet1RNB6Gqe9B4Z0CgVYeaiTAIh' },
+        '4': { name: 'Lemon', author: 'Kenshi Yonezu', fileId: '1YQ7vAQFL385FORCFq9BMkCh3kA3U9NRu' },
+        '5': { name: 'Thằng Cuội', author: 'Written by Lê Thương', fileId: '1UYbstxj6A8RoCIUus2ukUX6Hp3fdga6E' },
+        '6': { name: 'Giấc mơ trưa', author: 'Written by Giáng Son', fileId: '1MoZ99LDy6GjEl_Z2F0nTq-fACn88wwy3' },
+        '7': { name: 'Trường làng tôi', author: 'Written by Phạm Trọng Cầu (1948)', fileId: '1knbo5dFSme50Q_ahyi21I8cppM2z9JEs' },
+        '8': { name: 'Señorita', author: 'Shawn Mendes & Camila Cabello (2019)', fileId: '1wJ1Qis1CdXvDEBtB7it_eG5Zb4Pmocej' },
+        '9': { name: 'Proud of you', author: 'Written and performed by Fiona Fung (2003)', fileId: '1IzAO-_XiAuW9QAR27BN5XvDYIhMje3Fe' },
+        '10': { name: 'Jingle Bells', author: 'Written by James Lord Pierpont (1857)', fileId: '1nyzIPvdtjKi0hLFm-ma56o4RlT4_KfAW' },
+    };  
+
+    const sidebar = document.getElementById('sidebar');
+    const songList = document.getElementById('songList');
+    const videoTitle = document.getElementById('videoTitle');
+    const videoAuthor = document.getElementById('videoAuthor');
+    const videoContainer = document.getElementById('videoContainer');
+
+    window.toggleSidebar = function() {
+        sidebar.classList.toggle('open');
+    }
+
+    window.showSong = function(id) {
+        const song = songs[id];
+        if (!song) return;
+
+        videoTitle.textContent = song.name;
+        videoAuthor.textContent = song.author || '';
+
+        const iframeSrc = `https://drive.google.com/file/d/${song.fileId}/preview`;
+        
+        videoContainer.innerHTML = `<iframe 
+                                      src="${iframeSrc}" 
+                                      width="100%" 
+                                      height="100%" 
+                                      frameborder="0" 
+                                      allow="autoplay; fullscreen"
+                                      allowfullscreen></iframe>`;
+
+        document.querySelectorAll('#songList li').forEach(li => li.classList.remove('active'));
+        const activeLi = document.querySelector(`li[data-song-id='${id}']`);
+        if (activeLi) {
+            activeLi.classList.add('active');
+        }
+
+        if (!isFirstLoad && window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+    toggleSidebar();
+}
+    }
+
+    Object.keys(songs).forEach(id => {
+        const li = document.createElement('li');
+        li.textContent = songs[id].name;
+        li.dataset.songId = id;
+        li.onclick = () => showSong(id);
+        songList.appendChild(li);
+    });
+
+    const firstSongId = Object.keys(songs)[0];
+    if (firstSongId) {
+        showSong(firstSongId);
+    }
+});
+  </script>
+</body>
+</html>
